@@ -1,0 +1,319 @@
+        /* Reset e Stili Base */
+        :root {
+            --primary-color: #005ea2; /* Un blu più profondo */
+            --secondary-color: #e85f1a; /* Arancione come accento */
+            --light-bg: #f0f4f8; /* Sfondo corpo leggermente bluastro */
+            --content-bg: #ffffff;
+            --text-color: #212121;
+            --heading-color: #1a2e44; /* Blu scuro per titoli */
+            --link-color: var(--primary-color);
+            --link-hover-color: #003966; /* Blu più scuro per hover */
+            --code-bg: #2d2d2d;
+            --code-text: #cccccc;
+            --highlight-bg: #fff3e0; /* Giallo paglierino chiaro per highlight inline */
+            --highlight-border: #ffcc80; /* Giallo paglierino più scuro per bordo */
+            --box-highlight-bg: #e3f2fd; /* Azzurro molto chiaro per box */
+            --box-highlight-border: var(--primary-color);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+            /* Aggiunge padding in alto per compensare l'header fisso */
+            scroll-padding-top: 80px; /* Altezza approx header + margine */
+        }
+
+        body {
+            font-family: 'Lato', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            line-height: 1.75;
+            color: var(--text-color);
+            background-color: var(--light-bg);
+            display: flex;
+            flex-direction: column; /* Per posizionare header e main */
+            align-items: center;
+        }
+
+        /* Sticky Header */
+        header#main-header {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.8rem 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+        }
+
+        header#main-header nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-wrap: wrap; /* Permette al menu di andare a capo su schermi piccoli */
+            justify-content: center;
+        }
+
+        header#main-header nav ul li {
+            margin: 0 0.8rem;
+        }
+
+        header#main-header nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            padding: 0.5rem 0;
+            border-bottom: 2px solid transparent;
+            transition: border-bottom-color 0.3s ease, color 0.3s ease;
+        }
+
+        header#main-header nav ul li a:hover,
+        header#main-header nav ul li a:focus,
+        header#main-header nav ul li a.active { /* Classe per link attivo (opzionale JS) */
+            color: #e0f7fa; /* Leggermente più chiaro per feedback */
+            border-bottom-color: var(--secondary-color); /* Usa colore accento */
+        }
+
+        /* Contenitore Principale */
+        main {
+            width: 100%;
+            max-width: 950px; /* Leggermente più largo */
+            background-color: var(--content-bg);
+            border-radius: 0 0 8px 8px; /* Arrotonda solo angoli inferiori se header è attaccato*/
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            margin-top: 0; /* Rimosso margine se header è sticky */
+            margin-bottom: 2rem; /* Spazio sotto */
+        }
+
+        article {
+            padding: 2.5rem 3.5rem;
+        }
+
+        /* Responsività */
+        @media (max-width: 900px) {
+             main { max-width: 100%; border-radius: 0; }
+        }
+        @media (max-width: 768px) {
+            html { scroll-padding-top: 100px; /* Altezza header potrebbe aumentare se va a capo */ }
+            article { padding: 1.8rem 1.5rem; }
+            html { font-size: 15.5px; }
+            header#main-header nav ul li { margin: 0.2rem 0.5rem; } /* Riduci margini menu */
+            h1 { font-size: 2.1rem; }
+            h2 { font-size: 1.7rem; }
+            h3 { font-size: 1.4rem; }
+        }
+         @media (max-width: 480px) {
+             article { padding: 1.5rem 1rem; }
+             h1 { font-size: 1.9rem; }
+             h2 { font-size: 1.6rem; }
+             h3 { font-size: 1.3rem; }
+             header#main-header nav ul li a { font-size: 0.9rem; padding: 0.4rem 0; }
+         }
+
+
+        /* Tipografia */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Roboto Slab', serif;
+            color: var(--heading-color);
+            margin-top: 2.2em;
+            margin-bottom: 1em;
+            line-height: 1.4;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            border-bottom: 3px solid var(--secondary-color); /* Usa colore accento per H1 */
+            padding-bottom: 0.5em;
+            margin-top: 0;
+            color: var(--heading-color);
+        }
+
+        h2 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 0.4em;
+            color: var(--primary-color); /* Usa colore primario per H2 */
+            margin-top: 2.8em; /* Più spazio prima di H2 */
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--heading-color);
+            margin-top: 2.4em;
+            /* Stile opzionale: barra laterale */
+             border-left: 4px solid var(--secondary-color);
+             padding-left: 0.8em;
+        }
+
+        p {
+            margin-bottom: 1.4em;
+        }
+
+        /* Link */
+        a {
+            color: var(--link-color);
+            text-decoration: none;
+            font-weight: 600; /* Leggermente più bold */
+            transition: color 0.2s ease, border-bottom-color 0.2s ease;
+            border-bottom: 1px solid #b3d4fc; /* Sottile linea blu chiaro */
+        }
+
+        a:hover, a:focus {
+            color: var(--link-hover-color);
+            border-bottom-color: var(--link-hover-color);
+        }
+
+        /* Liste */
+        ul, ol {
+            margin-bottom: 1.4em;
+            padding-left: 2.5em; /* Indentazione leggermente aumentata */
+        }
+
+        li {
+            margin-bottom: 0.7em;
+            padding-left: 0.5em;
+        }
+        ul li::marker {
+             color: var(--secondary-color); /* Usa accento per bullet */
+             font-size: 1.1em;
+        }
+         ol li::marker {
+             color: var(--primary-color); /* Usa primario per numeri */
+             font-weight: bold;
+        }
+
+        /* Blocchi di Codice e Inline Code */
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            border: 1px solid #444;
+            border-left: 5px solid var(--secondary-color); /* Bordo accento a sx */
+            border-radius: 6px;
+            padding: 1.5em;
+            overflow-x: auto;
+            margin: 2em 0;
+            font-size: 0.95em;
+            line-height: 1.6;
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+        }
+
+        code { /* Stile per codice inline */
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            background-color: #e8eaf6; /* Sfondo lavanda chiaro */
+            padding: 0.25em 0.5em;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #3f51b5; /* Colore indaco */
+            border: 1px solid #c5cae9;
+        }
+
+        pre > code { /* Annulla stile inline per codice dentro <pre> */
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            color: inherit;
+            font-size: inherit;
+            border: none;
+        }
+
+        /* Highlight Box (per liste importanti o concetti chiave) */
+        .highlight-box {
+            background-color: var(--box-highlight-bg); /* Azzurro chiaro */
+            border-left: 5px solid var(--box-highlight-border); /* Blu primario */
+            padding: 1.5em 1.5em 0.5em 1.8em; /* Più padding a sx */
+            margin: 1.8em 0;
+            border-radius: 6px;
+            box-shadow: 1px 1px 5px rgba(0, 94, 162, 0.1);
+        }
+        .highlight-box ul, .highlight-box ol {
+             padding-left: 1.5em; /* Riduci indentazione interna */
+        }
+
+
+        /* Elementi specifici */
+        .reference {
+            font-size: 0.85em;
+            color: #666;
+            font-style: italic;
+            display: block;
+            margin-top: -0.8em;
+            margin-bottom: 1em;
+        }
+         .highlight { /* Evidenziazione inline */
+            background-color: var(--highlight-bg);
+            border-bottom: 2px solid var(--highlight-border);
+            padding: 0.1em 0.3em;
+            border-radius: 3px;
+            font-weight: 600;
+             color: #5d4037; /* Marrone scuro per testo evidenziato */
+        }
+
+
+        /* Separatori */
+        hr {
+            border: 0;
+            height: 2px; /* Più spesso */
+            background-image: linear-gradient(to right, rgba(0, 94, 162, 0), rgba(0, 94, 162, 0.7), rgba(0, 94, 162, 0)); /* Gradiente blu primario */
+            margin: 3.5em 0;
+        }
+
+        /* Stili per MathJax */
+        .MathJax {
+            font-size: 1.1em !important;
+            outline: none;
+            color: var(--text-color);
+        }
+        mjx-container[jax="CHTML"][display="true"] {
+             margin: 1.8em 0 !important;
+             overflow-x: auto;
+             overflow-y: hidden;
+             padding: 0.8em 0.5em; /* Padding anche laterale */
+             background: #fafafa; /* Sfondo leggermente diverso per equazioni */
+             border-radius: 4px;
+             border: 1px solid #eee;
+        }
+
+
+        /* Miglioramenti Accessibilità */
+        *:focus {
+            outline: 3px solid var(--secondary-color); /* Usa accento arancione per focus */
+            outline-offset: 3px;
+        }
+	/* Stile specifico per il link FAQ nel menu */
+	header#main-header nav ul li a.menu-faq-link {
+    background-color: var(--secondary-color); /* Usa il colore arancione di accento */
+    color: white; /* Assicura che il testo rimanga bianco e leggibile */
+    padding: 0.4em 0.8em; /* Aggiungi un po' di spazio interno per far vedere lo sfondo */
+    border-radius: 4px; /* Arrotonda leggermente gli angoli */
+    margin: -0.4em -0.8em; /* Compensa il padding per non alterare troppo lo spazio totale */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Aggiungi transizione */
+    border-bottom: none; /* Rimuovi eventuale bordo inferiore di default dei link */
+	}
+
+	/* Stile per l'hover/focus del link FAQ */
+	header#main-header nav ul li a.menu-faq-link:hover,
+	header#main-header nav ul li a.menu-faq-link:focus {
+    background-color: #d9520f; /* Un arancione leggermente più scuro per feedback */
+    color: white; /* Mantieni il testo bianco */
+    border-bottom: none; /* Mantieni senza bordo */
+	}
+
+	/* Opzionale: Stile diverso se il link è anche 'active' (cioè siamo sulla pagina FAQ) */
+	/* Se vuoi differenziare ulteriormente quando sei GIA' sulla pagina FAQ */
+	/*
+	header#main-header nav ul li a.menu-faq-link.active {
+    background-color: #b7430e; // Ancora più scuro o un altro stile
+    font-weight: bold;
+	}
+	*/

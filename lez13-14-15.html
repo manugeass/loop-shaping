@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione Approfondita: Progetto di Controllori tramite Loop Shaping</title>
+
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+          tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']]
+          },
+          svg: {
+            fontCache: 'global'
+          }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="stile.css">
+</head>
+<body>
+    <header id="main-header">
+        <nav>
+            <ul>
+                <li><a href="#obiettivo">Obiettivo</a></li>
+                <li><a href="#parte1">Parte 1: Intro</a></li>
+                <li><a href="#parte2">Parte 2: Filosofia</a></li>
+                <li><a href="#parte3">Parte 3: Regime ($C_R$)</a></li>
+                <li><a href="#parte4">Parte 4: Transitorio ($C_T$)</a></li>
+                <li><a href="#conclusioni">Conclusioni</a></li>
+		<li><a href="faq-loop-shaping.html" class="menu-faq-link">FAQ</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <article>
+            <h1>Lezione Approfondita: Progetto di Controllori tramite Loop Shaping</h1>
+            <p class="reference">(Basata su: "Steady-state control", "Loop Shaping - Introduction", "Loop Shaping Design")</p>
+
+            <p id="obiettivo"><strong>Obiettivo:</strong> Comprendere la filosofia e la metodologia del <span class="highlight">Loop Shaping</span>, una tecnica di progetto nel dominio della frequenza che mira a modellare la Funzione di Trasferimento d'Anello Aperto $L(s)$ per soddisfare specifiche sia sulla risposta transitoria sia su quella a regime permanente.</p>
+
+            <hr>
+
+            <section id="parte1">
+                <h2>Parte 1: Introduzione al Problema e Funzioni Fondamentali</h2>
+                <p class="reference">(Rif: LS-Intro pp. 2-5, Steady-state pp. 2-3)</p>
+
+                <h3>Il Problema del Controllo (Reference Tracking & Disturbance Rejection)</h3>
+                <p class="reference">(LS-Intro p.2)</p>
+                <p>L'obiettivo primario è progettare un controllore $C(s)$ per una data pianta $P(s)$ (o $G(s)$ in alcune notazioni) in modo che:</p>
+                <ul>
+                    <li>L'uscita $y$ insegua il più fedelmente possibile un riferimento desiderato $r$ (<span class="highlight">Tracking</span>).</li>
+                    <li>Il sistema sia il meno sensibile possibile ai disturbi $d$ (che possono agire sull'attuatore $d_a$, sull'uscita $d_y$, o sul sensore $d_t$) (<span class="highlight">Disturbance Rejection</span>).</li>
+                </ul>
+                <p>Lo schema di controllo più comune per raggiungere questi obiettivi è la <span class="highlight">retroazione (feedback)</span>.</p>
+                 <p class="reference">(Vedi schema LS-Intro p.8 o Steady-state p.2)</p>
+
+                <h3>Controllo Ideale vs Reale</h3>
+                <p class="reference">(LS-Intro p.3)</p>
+                <div class="highlight-box">
+                    <p>Si definiscono due funzioni chiave che legano gli input esterni (riferimento $r$, disturbo $d$) all'uscita $y$ (assumendo $d=0$ per $T$, $r=0$ per $S$):</p>
+                    <ul>
+                        <li><strong>Funzione di Trasmissione (o Sensibilità Complementare) $T(s)$</strong>: Lega $r$ a $y$.
+                            $$ T(s) = \frac{Y(s)}{R(s)} $$
+                        </li>
+                        <li><strong>Funzione di Sensibilità $S(s)$</strong>: Lega (ad esempio) il disturbo sull'uscita $d_y$ a $y$.
+                            $$ S(s) = \frac{Y(s)}{D_y(s)} $$
+                        </li>
+                    </ul>
+                    <p>Nel <span class="highlight">controllo ideale</span>, vorremmo ottenere:</p>
+                    <ul>
+                        <li>$T(s) = 1$ (Tracking perfetto: $Y(s) = 1 \cdot R(s)$).</li>
+                        <li>$S(s) = 0$ (Reiezione completa dei disturbi: $Y(s) = 0 \cdot D_y(s)$).</li>
+                    </ul>
+                </div>
+                <p>Nel <span class="highlight">controllo reale</span>, questo ideale non è raggiungibile a tutte le frequenze $\omega$. L'obiettivo diventa quindi approssimare il comportamento ideale il meglio possibile, specialmente nell'intervallo di frequenze operative di interesse.</p>
+
+                <h3>Controllo Open-Loop vs Closed-Loop</h3>
+                <p class="reference">(LS-Intro pp. 4-6)</p>
+                <p><strong>Open-Loop (Feedforward):</strong> Il controllore $C$ calcola l'ingresso $u$ basandosi solo sul riferimento $r$. L'uscita $y$ non influenza il comando $u$.</p>
+                <ul>
+                    <li><em>Svantaggi:</em> Non corregge errori dovuti a disturbi o incertezze sul modello della pianta $P(s)$. Non può stabilizzare piante intrinsecamente instabili.</li>
+                </ul>
+                 <p><strong>Closed-Loop (Feedback):</strong> Il comando $u$ dipende dall'errore $e = r - y$ (o $e = r - y_{\text{misurata}}$).</p>
+                 <div class="highlight-box">
+                     <ul>
+                         <li><em>Vantaggi:</em> Corregge continuamente il comportamento, permette:
+                             <ul>
+                                 <li>Migliore precisione di tracking.</li>
+                                 <li>Attenuazione/reiezione di disturbi e incertezze.</li>
+                                 <li>Stabilizzazione di piante instabili.</li>
+                             </ul>
+                         </li>
+                          <li>È l'approccio <span class="highlight">standard e più robusto</span>.</li>
+                     </ul>
+                 </div>
+
+                <h3>Struttura Generale del Sistema Controllato (Feedback)</h3>
+                 <p class="reference">(LS-Intro p.8, LS-Design p.2, Steady-state p.2)</p>
+                 <p>Lo schema completo include $C, A, P, G_s$, Filtro, $d_a, d_y, d_s, n$. Per l'analisi Loop Shaping, si usa spesso uno schema semplificato ($C, P (\text{o } G), H=1$):</p>
+                 <p class="reference">(LS-Intro p.9, LS-Design p.2, Steady-state p.2)</p>
+
+                <h3 id="funzioni-fondamentali">Le Funzioni Fondamentali del Loop Shaping</h3>
+                 <p class="reference">(LS-Intro p.10)</p>
+                 <p>Nello schema semplificato (C, G, H=1), si definiscono le quattro funzioni chiave:</p>
+                 <div class="highlight-box">
+                     <ol>
+                        <li><strong>Funzione d'Anello (Loop Function):</strong> $L(s) = C(s)G(s)$</li>
+                        <li><strong>Funzione di Sensibilità ($S$):</strong> (Disturbo su uscita $\rightarrow$ Uscita)
+                           $$ S(s) = \frac{Y(s)}{D_y(s)} = \frac{1}{1 + L(s)} $$
+                        </li>
+                        <li><strong>Funzione di Trasmissione ($T$):</strong> (Riferimento $\rightarrow$ Uscita)
+                           $$ T(s) = \frac{Y(s)}{R(s)} = \frac{L(s)}{1 + L(s)} $$
+                           <span class="highlight">Importante:</span> $S(s) + T(s) = 1$.
+                        </li>
+                         <li><strong>Control Effort / Disturbance on Actuator ($Q$):</strong> (Disturbo su attuatore $\rightarrow$ Uscita)
+                           $$ Q(s) = \frac{Y(s)}{D_a(s)} = \frac{G(s)}{1 + L(s)} $$
+                        </li>
+                     </ol>
+                 </div>
+            </section>
+
+            <hr>
+
+            <section id="parte2">
+                <h2>Parte 2: La Filosofia del Loop Shaping</h2>
+                <p class="reference">(Rif: LS-Intro pp. 11-15)</p>
+
+                <h3>L'Idea Centrale: Modellare $L(s)$</h3>
+                <p>Il <span class="highlight">Loop Shaping</span> si basa sull'idea che le prestazioni ad anello chiuso (espresse da $S(s)$ e $T(s)$) dipendono dalla "forma" della funzione d'anello aperto $L(s) = C(s)P(s)$ in frequenza. L'obiettivo è progettare $C(s)$ per dare a $L(j\omega)$ una forma desiderata sul diagramma di Bode.</p>
+
+                <h3>Forma Desiderata di $|L(j\omega)|$</h3>
+                <p class="reference">(LS-Intro p.11)</p>
+                <p>Il profilo tipico desiderato per $|L(j\omega)|$ (in dB):</p>
+                 <div class="highlight-box">
+                    <ul>
+                        <li><strong>Basse frequenze ($\omega \ll \omega_c$):</strong> <span class="highlight">Guadagno alto</span> ($|L| \gg 1$, $> 0$ dB).</li>
+                        <li><strong>Alte frequenze ($\omega \gg \omega_c$):</strong> <span class="highlight">Guadagno basso</span> ($|L| \ll 1$, $< 0$ dB).</li>
+                        <li><strong>Frequenza di Crossover ($\omega_c$):</strong> Frequenza a cui $|L(j\omega_c)| = 1$ (0 dB). Separa le zone.</li>
+                        <li><strong>Pendenza intorno a $\omega_c$:</strong> Circa <span class="highlight">-20 dB/decade</span> per buona stabilità (margine di fase).</li>
+                    </ul>
+                 </div>
+
+                <h3>Significato di Alto/Basso Guadagno d'Anello</h3>
+                <p class="reference">(LS-Intro pp. 12-14)</p>
+                <div class="highlight-box">
+                    <ul>
+                        <li><strong>Basse Frequenze ($|L| \gg 1$):</strong>
+                            <ul>
+                                <li>$T \approx 1 \implies$ <span class="highlight">Buon tracking</span> ($Y \approx R$).</li>
+                                <li>$S \approx 1/L \implies |S| \ll 1 \implies$ <span class="highlight">Buona reiezione disturbi</span>.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Alte Frequenze ($|L| \ll 1$):</strong>
+                            <ul>
+                                 <li>$T \approx L \implies |T| \ll 1 \implies$ <span class="highlight">Non insegue riferimenti HF</span> (desiderabile vs rumore).</li>
+                                 <li>$S \approx 1 \implies$ <span class="highlight">Non rigetta disturbi HF</span>.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <p>La <strong>frequenza di crossover $\omega_c$</strong> definisce la <span class="highlight">larghezza di banda</span> ($\approx \omega_B$) e la <span class="highlight">velocità</span> del sistema.</p>
+
+                <h3>Conclusioni Preliminari</h3>
+                 <p class="reference">(LS-Intro p.15)</p>
+                <p>Il controllo ideale ($T=1, S=0$) è impossibile ($\omega_c = \infty$). Un buon controllo reale cerca:</p>
+                <ul>
+                    <li>$|L|$ grande fino alla $\omega$ di interesse ($\implies$ $\omega_c$ "grande").</li>
+                    <li>$|L|$ piccolo dopo $\omega_c$ (per stabilità e vs rumore).</li>
+                </ul>
+                <p>Il progetto consiste nel <span class="highlight">modellare $L(j\omega)$</span> con $C(s)$ per il miglior compromesso.</p>
+            </section>
+
+            <hr>
+
+            <section id="parte3">
+                <h2>Parte 3: Progetto del Controllore a Regime ($C_R$)</h2>
+                <p class="reference">(Rif: Steady-state, LS-Design pp. 2-7)</p>
+
+                <h3>Separazione del Progetto (Steady-state vs Transient)</h3>
+                <p class="reference">(Steady-state p.2, LS-Design p.2)</p>
+                <p>Si progetta $C(s)$ in due parti: $ C(s) = C_R(s) \cdot C_T(s) $</p>
+                <ol>
+                    <li><strong>$C_R(s)$ (Regime):</strong> Soddisfa requisiti $e_{ss}$, $y_{ss}^{(d)}$.</li>
+                    <li><strong>$C_T(s)$ (Transitorio):</strong> Modella $L(s)$ intorno a $\omega_c$ per stabilità e dinamica ($P_m$, $\omega_c$).</li>
+                </ol>
+
+                <h3>Progetto di $C_R(s)$ - Obiettivi</h3>
+                 <p class="reference">(Steady-state p.3)</p>
+                 <ul>
+                    <li><strong>Precisione (Tracking):</strong> $e_{ss} = \lim e(t)$ nullo o $< e_{max}$ per $r(t)$.</li>
+                    <li><strong>Reiezione Disturbi:</strong> $y_{ss}^{(d)} = \lim y^{(d)}(t)$ nullo o $< y_{max}$ per $d(t)$.</li>
+                 </ul>
+
+                <h3>Principio del Modello Interno</h3>
+                 <p class="reference">(Steady-state pp. 9-12)</p>
+                 <div class="highlight-box">
+                    <p><span class="highlight">Idea Chiave (IMP):</span> Per $e_{ss}=0$ (o $y_{ss}^{(d)}=0$), $L(s)$ deve contenere i poli instabili/sull'asse immaginario di $R(s)$ (o $D(s)$).</p>
+                    <p><strong>Caso Polinomiale:</strong> $r(t) \propto t^m \implies R(s)$ ha polo $s=0$ di ordine $m+1$.</p>
+                    <p><strong>Tipo del Sistema (k):</strong> Numero di poli $s=0$ in $L(s)$. $L(s) = \frac{K_g N(s)}{s^k D(s)}$.</p>
+                    <p><strong>Corollario (Ingressi Polinomiali):</strong> Dato ingresso di grado $m$:</p>
+                     <ul>
+                         <li>$k \ge m+1 \implies e_{ss} = 0$.</li>
+                         <li>$k = m \implies 0 < |e_{ss}| < \infty$.</li>
+                         <li>$k < m \implies |e_{ss}| = \infty$.</li>
+                     </ul>
+                 </div>
+                 <p>Tabella (Steady-state p.12, LS-Design p.5) riassume per $k=0,1,2$ e $m=0,1,2$ (gradino, rampa, parabola).</p>
+                 <p><strong>Guadagno Generalizzato $K_g$:</strong> Se $k=m$, $|e_{ss}| = |A| / |K_g|$, dove $K_g = \lim_{s \to 0} s^k L(s)$.</p>
+
+                <h3>Progettazione Pratica di $C_R(s)$</h3>
+                 <p class="reference">(LS-Design p.3, Steady-state pp. 19-20)</p>
+                 <p>Forma tipica: $ C_R(s) = \frac{K_c}{s^q} $</p>
+                <p><strong>Scelta di $q$ (Tipo):</strong></p>
+                 <ul>
+                     <li>Si sceglie $q$ affinché il tipo totale dell'anello $k = k_P + q$ (con $k_P$ = tipo di $P(s)$) soddisfi i requisiti di $e_{ss}$ (usando il corollario IMP).</li>
+                     <li>Esempio: $P(s)$ Tipo 0 ($k_P=0$), voglio $e_{ss}=0$ per gradino ($m=0$). Richiede $k \ge 1$. Scelgo $q=1$.</li>
+                 </ul>
+                <p><strong>Scelta di $K_c$ (Guadagno):</strong></p>
+                 <ul>
+                     <li>Se $e_{ss}=0$ ($k > m$), $K_c$ non influenza $e_{ss}$ (purché $\neq 0$). Si sceglie $K_c=1$ o un valore base, poi si affina con $C_T$.</li>
+                     <li>Se $e_{ss}$ finito ($k = m$), $K_c$ deve essere scelto per soddisfare $|e_{ss}| \le e_{max}$. $K_c$ influenza $K_g$. Si calcola $K_c$ minimo necessario.</li>
+                 </ul>
+                 <p><strong>Attenzione:</strong> $C_R$ da solo non garantisce stabilità. Serve $C_T$.</p>
+                <p class="reference">(Esempi: Steady-state pp. 13-18).</p>
+            </section>
+
+            <hr>
+
+            <section id="parte4">
+                <h2>Parte 4: Progetto del Controllore Transitorio ($C_T$) - Loop Shaping</h2>
+                <p class="reference">(Rif: LS-Design pp. 8-14)</p>
+
+                <h3>Obiettivo di $C_T(s)$</h3>
+                <p>Dopo $C_R$, si progetta $C_T(s)$ per <span class="highlight">modellare $L(s) = P(s)C_R(s)C_T(s)$</span> in frequenza (Bode) e soddisfare requisiti su <span class="highlight">transitorio</span> (velocità, smorzamento) e <span class="highlight">stabilità</span>.</p>
+
+                <h3>Requisiti Transitori in Frequenza</h3>
+                <p>Specifiche temporali ($\%OS, t_r, t_s$) tradotte in specifiche su $L(j\omega)$:</p>
+                 <div class="highlight-box">
+                    <ul>
+                        <li><strong>Margine di Fase ($P_m$):</strong> Legato a smorzamento $\zeta$ e $\%OS$. Valori tipici: $P_m \in [45^\circ, 60^\circ]$. Misurato a $\omega_{cg}$ (dove $|L|=1$).
+                            $$ P_m = 180^\circ + \angle L(j\omega_{cg}) $$
+                             <p class="reference">(Rif. LS-Design p.8)</p>
+                        </li>
+                         <li><strong>Freq. Crossover Guadagno ($\omega_{cg}$):</strong> Legata a banda $\omega_B$ e velocità ($t_r, t_s$). $\omega_B \approx (1.5 \div 2) \omega_{cg}$. $\omega_{cg}$ alta $\implies$ risposta veloce.
+                             <p class="reference">(Rif. LS-Design p.4)</p>
+                        </li>
+                        <li><strong>Margine di Guadagno ($G_m$):</strong> Robustezza alla stabilità. Misurato a $\omega_{cp}$ (dove $\angle L = -180^\circ$). Valori tipici: $G_m \ge 6$ dB.
+                            $$ G_m = - |L(j\omega_{cp})|_{\text{dB}} $$
+                        </li>
+                    </ul>
+                 </div>
+
+                <h3>Il Processo di Loop Shaping ("Trial & Error" Guidato)</h3>
+                <p class="reference">(LS-Design p.9)</p>
+                <p>Processo iterativo (spesso con MATLAB):</p>
+                <ol>
+                    <li><strong>Analisi $L_{\text{parziale}} = P C_R$:</strong> Traccia Bode, misura $P_{m, \text{parz}}, \omega_{cg, \text{parz}}, G_{m, \text{parz}}$.</li>
+                    <li><strong>Confronto Specifiche:</strong> Determina $\Delta P_m$, $\Delta \omega_{cg}$ necessari.</li>
+                    <li><strong>Progetto $C_T(s)$:</strong> Usa <span class="highlight">reti correttrici</span> (Lead, Lag, Lead-Lag, PID) per "modellare" $L_{\text{parziale}}$ e ottenere $L_{\text{finale}} = L_{\text{parziale}} C_T$ che soddisfi $P_{m, \text{des}}$ a $\omega_{cg, \text{des}}$.</li>
+                    <li><strong>Verifica $L_{\text{finale}}$:</strong> Controlla Bode, margini, $\omega_{cg}$. Simula risposta al gradino (verifica $\%OS, t_r, t_s, e_{ss}$).</li>
+                    <li><strong>Itera:</strong> Modifica $C_T(s)$ se necessario e ripeti da 3.</li>
+                </ol>
+
+                <h3>Reti Correttrici Fondamentali</h3>
+                 <p class="reference">(LS-Design pp. 11-14, CONTROL REVIEW pp. 111-116)</p>
+                 <p>Blocchi usati in $C_T(s)$:</p>
+                 <div class="highlight-box">
+                     <ul>
+                         <li>
+                             <strong>Rete Integrale / PI:</strong> $C_{PI}(s) = K_c \frac{\tau_z s + 1}{s}$
+                             Effetto: Polo in $s=0$ (tipo $\uparrow$, $e_{ss} \downarrow$). Zero limita caduta di fase. Aumenta guadagno a basse freq.
+                         </li>
+                         <li>
+                             <strong>Rete Ritardatrice (Lag):</strong> $C_{Lag}(s) = \frac{1 + \tau s}{1 + m \tau s}$, ($m > 1$).
+                             Effetto: Attenua HF (fattore $1/m$). Introduce <span class="highlight">ritardo di fase (lag)</span> a freq. intermedie.
+                             Uso: Ridurre $\omega_{cg}$ o aumentare $K_g$ (migliorare $e_{ss}$) senza peggiorare troppo $P_m$ (posizionandola $\ll \omega_{cg}$).
+                         </li>
+                          <li>
+                             <strong>Rete Anticipatrice (Lead):</strong> $C_{Lead}(s) = \frac{1 + \tau s}{1 + (\tau/m) s}$, ($m > 1$).
+                             Effetto: Amplifica HF (fattore $m$). Introduce <span class="highlight">anticipo di fase (lead)</span> a freq. intermedie.
+                             Uso: <span class="highlight">Aumentare $P_m$</span> (posizionando max lead vicino a $\omega_{cg}$). Tende ad <span class="highlight">aumentare $\omega_{cg}$</span> (velocità $\uparrow$). Essenziale per stabilità/smorzamento.
+                         </li>
+                         <li>
+                             <strong>Rete Lead-Lag:</strong> Combina Lead + Lag per benefici multipli.
+                         </li>
+                     </ul>
+                 </div>
+                 <p class="reference">(Esempi: LS-Design pp. 15-20, CONTROL REVIEW pp. 111-128).</p>
+
+            </section>
+
+            <hr>
+
+            <footer id="conclusioni">
+                <p>Questa lezione integrata copre l'intero flusso del progetto tramite Loop Shaping: requisiti a regime (IMP, Tipo, $C_R$), filosofia ($L(s)$ shaping), requisiti transitori ($P_m, \omega_{cg}$), e uso di reti correttrici (Lead/Lag, $C_T$) per raggiungere le specifiche.</p>
+                <p style="text-align:center; margin-top: 2em; font-size: 0.9em; color: #777;">Fine della lezione.</p>
+            </footer>
+
+        </article>
+    </main>
+</body>
+</html>

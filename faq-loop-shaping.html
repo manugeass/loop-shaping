@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - Loop Shaping</title>
+
+    <!-- Link al file CSS esterno -->
+    <link rel="stylesheet" href="stile.css">
+
+    <!-- MathJax (se necessario) -->
+    <script>
+        window.MathJax = {
+          tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+          svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- Font (se usi Google Fonts, includili anche qui) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Aggiungi qui eventuali stili *specifici* solo per la pagina FAQ, se necessario */
+        details {
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            border-left: 3px solid var(--secondary-color); /* Usa colore accento */
+            border-radius: 4px;
+            margin-bottom: 1em;
+            transition: background-color 0.2s ease;
+        }
+        details[open] {
+            background-color: #fff;
+        }
+        summary {
+            padding: 1em 1.2em;
+            font-weight: 700;
+            font-family: 'Roboto Slab', serif;
+            cursor: pointer;
+            color: var(--heading-color);
+            outline: none; /* Rimuovi outline di default, gestiremo il focus */
+            transition: background-color 0.2s ease;
+        }
+        summary:hover, summary:focus {
+             background-color: #eef2f7; /* Leggero highlight su hover/focus */
+        }
+        details div.answer { /* Contenitore per la risposta */
+             padding: 0.5em 1.5em 1.5em 1.5em;
+             line-height: 1.7;
+             border-top: 1px dashed #ddd;
+             margin-top: 0.5em;
+        }
+        summary::marker { /* Nasconde il triangolino di default in alcuni browser */
+            content: "";
+        }
+         summary::before { /* Aggiunge un indicatore custom (+/-) */
+            content: '+ ';
+            font-weight: bold;
+            margin-right: 0.5em;
+            color: var(--primary-color);
+         }
+         details[open] summary::before {
+             content: '− ';
+         }
+
+    </style>
+
+</head>
+<body>
+    <!-- Includi lo stesso header della pagina principale per coerenza -->
+    <header id="main-header">
+        <nav>
+             <ul>
+                 <li><a href="lez13-14-15.html#obiettivo">Obiettivo</a></li> <!-- Aggiorna NOME_FILE_PRINCIPALE.html -->
+                 <li><a href="lez13-14-15.html#parte1">Parte 1: Intro</a></li>
+                 <li><a href="lez13-14-15.html#parte2">Parte 2: Filosofia</a></li>
+                 <li><a href="lez13-14-15.html#parte3">Parte 3: Regime ($C_R$)</a></li>
+                 <li><a href="lez13-14-15.html#parte4">Parte 4: Transitorio ($C_T$)</a></li>
+                 <li><a href="lez13-14-15.html#conclusioni">Conclusioni</a></li>
+                 <li><a href="faq-loop-shaping.html" class="active">FAQ</a></li> <!-- Link a se stesso, magari con classe 'active' -->
+             </ul>
+        </nav>
+    </header>
+
+    <main>
+        <article>
+                        <h1>Domande Frequenti (FAQ) - Loop Shaping</h1>
+
+            <p>Qui trovi risposte alle domande più comuni sulla tecnica del Loop Shaping.</p>
+            <hr style="margin: 2em 0;"> <!-- Aggiungo un separatore -->
+
+            <details>
+                <summary>Domanda 1: Il Principio del Modello Interno: Perché esattamente inserire un polo $1/s$ nel controllore annulla l'errore per un gradino? Come funziona matematicamente e intuitivamente nel dettaglio? Come si estende a rampe e parabole (Tipo 1, Tipo 2)?</summary>
+                <div class="answer">
+                    <p><strong>Contesto Matematico (Teorema Valore Finale):</strong> Ricordiamo la formula dell'errore a regime $e_{ss}$ per un ingresso $R(s)$ generico, assumendo stabilità dell'anello chiuso:</p>
+                    $$ e_{ss} = \lim_{s \to 0} s \cdot e(s) = \lim_{s \to 0} s \cdot \frac{R(s)}{1 + L(s)} $$
+                    <p>dove $L(s) = C(s)G(s)$ è la funzione d'anello aperto.</p>
+
+                    <p><strong>Caso Ingresso a Gradino Unitario:</strong> Per un gradino unitario, $R(s) = 1/s$. Sostituendo:</p>
+                    $$ e_{ss}(\text{gradino}) = \lim_{s \to 0} s \cdot \frac{1/s}{1 + L(s)} = \lim_{s \to 0} \frac{1}{1 + L(s)} = \frac{1}{1 + \lim_{s \to 0} L(s)} $$
+                    <p>L'errore a regime dipende dall'inverso di $1 +$ il guadagno statico d'anello $L(0)$.</p>
+
+                    <p><strong>Inserire l'Integratore ($1/s$) in $L(s)$:</strong> Supponiamo che il nostro controllore $C(s)$ contenga un termine integrale, quindi $C(s)$ ha un polo in $s=0$. Di conseguenza, anche la funzione d'anello $L(s) = C(s)G(s)$ avrà almeno un polo in $s=0$ (a meno che la pianta $G(s)$ non abbia uno zero in $s=0$ che lo cancelli, caso raro e spesso indesiderato). Possiamo scrivere $L(s)$ come:</p>
+                    $$ L(s) = \frac{N_L(s)}{s \cdot D'_L(s)} $$
+                    <p>dove $N_L(0) \neq 0$ e $D'_L(0) \neq 0$ (cioè, abbiamo isolato un singolo polo nell'origine).</p>
+
+                    <p><strong>Calcolo di $L(0)$:</strong> Calcoliamo il limite per $s \to 0$:</p>
+                    $$ L(0) = \lim_{s \to 0} \frac{N_L(s)}{s \cdot D'_L(s)} = \frac{N_L(0)}{0 \cdot D'_L(0)} \rightarrow \infty $$
+                    <p>Il guadagno statico d'anello diventa infinito a causa del polo $1/s$.</p>
+
+                    <p><strong>Errore a Regime Risultante:</strong> Sostituendo $L(0)=\infty$ nella formula dell'errore:</p>
+                    $$ e_{ss}(\text{gradino}) = \frac{1}{1 + \infty} = 0 $$
+                    <p>Matematicamente, la presenza del polo $1/s$ in $L(s)$ rende il guadagno statico dell'anello infinito, il che forza l'errore a regime per un ingresso a gradino ad essere zero.</p>
+
+                    <p><strong>Spiegazione Intuitiva (Accumulo):</strong> Come già accennato, l'integratore nel controllore ($u_I(t) = K_i \int e(\tau) d\tau$) accumula l'errore nel tempo. Se ci fosse un errore costante residuo $e_{ss} \neq 0$, l'uscita dell'integratore continuerebbe a crescere (o diminuire) indefinitamente. Questo comando $u_I$ sempre crescente (sommato all'eventuale azione proporzionale) spingerebbe l'uscita della pianta $y(t)$ a muoversi ulteriormente, modificando così l'errore $e(t)$. L'unico punto di equilibrio possibile in cui l'uscita dell'integratore smette di cambiare è quando il suo ingresso, l'errore $e(t)$, diventa esattamente zero. L'integratore "non si ferma" finché l'errore non è stato annullato.</p>
+
+                    <p><strong>Estensione a Rampa/Parabola (Tipo del Sistema):</strong></p>
+                    <ul>
+                        <li><strong>Ingresso Rampa:</strong> $R(s) = 1/s^2$. L'errore a regime è
+                           $$ e_{ss} = \lim_{s \to 0} s \cdot \frac{1/s^2}{1 + L(s)} = \lim_{s \to 0} \frac{1}{s(1 + L(s))} = \lim_{s \to 0} \frac{1}{s + s L(s)} $$
+                           <ul>
+                               <li>Se $L(s)$ è <strong>Tipo 0</strong> (nessun polo in 0, $L(0)=K_p$ finito), $e_{ss} = 1/(0 + 0 \cdot K_p) \rightarrow \infty$. Errore infinito.</li>
+                               <li>Se $L(s)$ è <strong>Tipo 1</strong> ($L(s)=L'(s)/s$, $L'(0)=K_v$ finito, costante di errore di velocità), $e_{ss} = \lim_{s \to 0} \frac{1}{s + s (L'(s)/s)} = \lim_{s \to 0} \frac{1}{s + L'(s)} = \frac{1}{0 + K_v} = \frac{1}{K_v}$. Errore finito e costante.</li>
+                               <li>Se $L(s)$ è <strong>Tipo 2</strong> ($L(s)=L''(s)/s^2$, $L''(0)=K_a$ finito, costante di errore di accelerazione), $e_{ss} = \lim_{s \to 0} \frac{1}{s + s (L''(s)/s^2)} = \lim_{s \to 0} \frac{1}{s + L''(s)/s}$. Moltiplicando num/den per s: $e_{ss} = \lim_{s \to 0} \frac{s}{s^2 + L''(s)} = \frac{0}{0 + K_a} = 0$. Errore zero.</li>
+                           </ul>
+                        </li>
+                        <li><strong>Ingresso Parabola:</strong> $R(s) = 1/s^3$. L'errore a regime è
+                           $$ e_{ss} = \lim_{s \to 0} s \cdot \frac{1/s^3}{1 + L(s)} = \lim_{s \to 0} \frac{1}{s^2 + s^2 L(s)} $$
+                           <ul>
+                               <li>Errore zero solo se $L(s)$ è almeno <strong>Tipo 3</strong>.</li>
+                               <li>Errore finito se è <strong>Tipo 2</strong> ($e_{ss} = 1/K_a$).</li>
+                               <li>Infinito per <strong>Tipo 0 e 1</strong>.</li>
+                           </ul>
+                        </li>
+                    </ul>
+
+                    <p><strong>Principio del Modello Interno (Generalizzato):</strong> Per avere errore a regime nullo per un ingresso con poli $p_{ref}$ sull'asse immaginario (come $s=0$ per gradino, rampa, parabola), la funzione d'anello $L(s)$ deve contenere gli stessi poli $p_{ref}$ nel suo denominatore. In pratica, per annullare l'errore per $t^m/m!$ ($m+1$ poli in 0 nell'ingresso), $L(s)$ deve avere almeno $m+1$ poli in 0 (essere di Tipo $k \ge m+1$).</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Domanda 2: La Funzione di Sensibilità $S(s)$ e la Sensibilità Complementare $T(s)$: Da dove vengono esattamente? Come si interpretano i loro diagrammi di Bode in relazione a $L(s)$? Qual è il significato profondo del trade-off $S+T=1$?</summary>
+                <div class="answer">
+                    <p><strong>Origine delle Definizioni</strong> <span class="reference">(Rif: LS-Intro p.10)</span>: Vengono definite nello schema a retroazione unitaria semplificato:</p>
+                    <ul>
+                        <li>$T(s)$ (Transmission/Complementary Sensitivity): È semplicemente la Funzione di Trasferimento ad Anello Chiuso da riferimento $r$ a uscita $y$.
+                           $$ T(s) = \frac{Y(s)}{R(s)} = \frac{L(s)}{1 + L(s)} $$
+                        </li>
+                        <li>$S(s)$ (Sensitivity Function): È definita come la FdT dal disturbo sull'uscita $d_y$ all'uscita $y$.
+                           $$ S(s) = \frac{Y(s)}{D_y(s)} = \frac{1}{1 + L(s)} $$
+                           (Nota: È anche la FdT da $r$ all'errore $e$, infatti $E(s) = R(s)-Y(s) = (1-T(s))R(s) = S(s)R(s)$).
+                        </li>
+                    </ul>
+
+                    <p><strong>Interpretazione dei Diagrammi di Bode</strong> <span class="reference">(Rif: LS-Intro pp. 13-14)</span>:</p>
+                    <ul>
+                        <li><strong>Basse Frequenze ($\omega \ll \omega_c$):</strong> Qui $|L(j\omega)| \gg 1$.
+                            <ul>
+                                <li>$|T(j\omega)| = |\frac{L}{1+L}| \approx |\frac{L}{L}| = 1$ (0 dB). Buon tracking.</li>
+                                <li>$|S(j\omega)| = |\frac{1}{1+L}| \approx |\frac{1}{L}| = \frac{1}{|L(j\omega)|} \ll 1$. Buona reiezione disturbi. In dB: $\log|S| \approx -\log|L|$.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Alte Frequenze ($\omega \gg \omega_c$):</strong> Qui $|L(j\omega)| \ll 1$.
+                            <ul>
+                                <li>$|T(j\omega)| = |\frac{L}{1+L}| \approx |L(j\omega)| \ll 1$. Cattivo tracking (passa-basso).</li>
+                                <li>$|S(j\omega)| = |\frac{1}{1+L}| \approx |1| = 1$ (0 dB). Cattiva reiezione disturbi.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Intorno a $\omega_c$:</strong> $|L(j\omega_c)| = 1$.
+                            <ul>
+                                <li>$|T(j\omega_c)| = |L/(1+L)|$.</li>
+                                <li>$|S(j\omega_c)| = |1/(1+L)|$.</li>
+                                <li>Se lo smorzamento è basso (Pm basso), $|S|$ e $|T|$ possono avere un picco $> 1$ (> 0 dB), indicando potenziale amplificazione di riferimenti/disturbi in quella banda.</li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <p><strong>Significato del Trade-off $S(s) + T(s) = 1$:</strong></p>
+                    <p>Questa identità algebrica ($\frac{1}{1+L} + \frac{L}{1+L} = \frac{1+L}{1+L} = 1$) è sempre vera.</p>
+                    <p><strong>Significato Profondo:</strong> Rappresenta un compromesso fondamentale. Non si può avere contemporaneamente $T=1$ (tracking perfetto) e $S=0$ (reiezione disturbi perfetta) a tutte le frequenze.</p>
+                    <ul>
+                        <li>Dove vogliamo $T(j\omega) \approx 1$ (buon tracking), allora $S(j\omega) = 1 - T(j\omega) \approx 0$ (buona reiezione). Questo richiede $|L(j\omega)| \gg 1$ (basse freq.).</li>
+                        <li>Dove siamo costretti ad avere $|L(j\omega)| \ll 1$ (alte freq.), allora $T(j\omega) \approx L(j\omega)$ (cattivo tracking) e $S(j\omega) \approx 1$ (cattiva reiezione).</li>
+                    </ul>
+                    <p>Il progetto Loop Shaping consiste nel modellare $L(j\omega)$ per ottenere $T \approx 1$ (e $S \approx 0$) nell'intervallo di frequenza più ampio possibile ($\omega_c$ alta), mantenendo stabilità ($P_m$, $G_m$) e rispettando i limiti sull'attività di comando e rumore.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Domanda 3: Il Margine di Fase ($P_m$): Definizione esatta, come si legge sul Bode, perché è collegato allo smorzamento/overshoot (relazione con $\zeta$), come una rete Lead lo aumenta?</summary>
+                <div class="answer">
+                     <p><strong>Definizione Esatta:</strong> Il Margine di Fase ($P_m$ o $\phi_m$) è la distanza della fase di $L(j\omega)$ da -180° quando il modulo $|L(j\omega)|$ è 1 (0 dB).</p>
+                     <ul>
+                         <li><strong>Frequenza Crossover Guadagno ($\omega_{cg}$):</strong> Frequenza tale che $|L(j\omega_{cg})| = 1$.</li>
+                         <li><strong>Formula:</strong> $P_m = 180^\circ + \angle L(j\omega_{cg})$</li>
+                     </ul>
+                     <p><strong>Interpretazione:</strong> Indica quanto margine di fase abbiamo prima dell'instabilità (secondo Nyquist). $P_m > 0$ è necessario per la stabilità (per sistemi stabili ad anello aperto).</p>
+
+                     <p><strong>Lettura sul Bode:</strong> <span class="reference">(Rif. LS-Design p.8, CONTROL REVIEW p.72)</span></p>
+                     <ol>
+                         <li>Trova $\omega_{cg}$ sul grafico del Modulo (dove attraversa 0 dB).</li>
+                         <li>Vai sul grafico della Fase alla stessa $\omega_{cg}$.</li>
+                         <li>Leggi la fase $\phi_{cg} = \angle L(j\omega_{cg})$.</li>
+                         <li>$P_m$ è la distanza verticale tra $\phi_{cg}$ e la linea -180°. $P_m = \phi_{cg} - (-180^\circ)$.</li>
+                     </ol>
+
+                     <p><strong>Collegamento Smorzamento/Overshoot (Relazione con $\zeta$):</strong></p>
+                     <p>C'è una forte correlazione tra $P_m$ e il coefficiente di smorzamento $\zeta$ dei poli dominanti ad anello chiuso.</p>
+                     <ul>
+                         <li><strong>Approssimazione Utile:</strong> $\zeta \approx P_m(\text{in gradi}) / 100$. (Es: $P_m=60^\circ \implies \zeta \approx 0.6$).</li>
+                         <li><strong>Regole Pratiche:</strong>
+                             <ul>
+                                 <li>$P_m$ piccolo (< 30°): $\zeta$ basso, alto overshoot, oscillazioni.</li>
+                                 <li>$P_m$ medio (45°-60°): $\zeta$ moderato (0.45-0.6), buon compromesso (overshoot 5-20%).</li>
+                                 <li>$P_m$ grande (> 70°): $\zeta$ alto (> 0.7), molto smorzato, no overshoot, risposta più lenta.</li>
+                             </ul>
+                         </li>
+                     </ul>
+                     <p>Scegliere $P_m$ è un modo per specificare lo smorzamento $\zeta$ desiderato.</p>
+
+                     <p><strong>Come una Rete Lead Aumenta $P_m$:</strong></p>
+                     <p>La rete Lead $C_{lead}(s) = \frac{1 + \tau s}{1 + (\tau/m) s}$ ($m > 1$) introduce un <span class="highlight">anticipo di fase</span> positivo $\phi_{max}$ a $\omega_{max}$.</p>
+                     <p><strong>Strategia:</strong> Si progetta la rete Lead (scegliendo $\tau$ e $m$) in modo che $\omega_{max}$ sia vicina alla $\omega_{cg}$ desiderata.</p>
+                     <p><strong>Risultato:</strong> L'anticipo di fase a $\omega_{cg}$ fornito dalla rete Lead si somma alla fase originale di $L(j\omega_{cg})$, alzando la curva di fase in quella regione. Questo aumenta la distanza da -180° a $\omega_{cg}$, incrementando $P_m$. <span class="reference">(Vedi CONTROL REVIEW p. 114 grafico)</span>.</p>
+                </div>
+            </details>
+
+             <details>
+                 <summary>Domanda 4: La Frequenza di Crossover ($\omega_c$): Definizione esatta, come si legge sul Bode, perché è collegata alla velocità/banda passante, come le reti Lead/Lag la influenzano?</summary>
+                 <div class="answer">
+                     <p><strong>Definizione Esatta:</strong> La Frequenza di Crossover (del Guadagno) $\omega_c$ (o $\omega_{cg}$) è la frequenza angolare alla quale $|L(j\omega)| = 1$ (0 dB).</p>
+                     $$ |L(j\omega_c)| = 1 $$
+
+                     <p><strong>Lettura sul Bode:</strong> Trova la frequenza sul grafico del Modulo dove la curva attraversa la linea 0 dB.</p>
+
+                     <p><strong>Collegamento Velocità/Banda Passante:</strong></p>
+                     <ul>
+                         <li><strong>Banda Passante ($\omega_B$):</strong> Frequenza a cui $|T(j\omega)| = |L/(1+L)|$ scende a -3 dB (0.707).</li>
+                         <li><strong>Relazione $\omega_c \leftrightarrow \omega_B$:</strong> $\omega_B \approx (1.5 \text{ a } 2) \cdot \omega_c$.</li>
+                         <li><strong>Significato di $\omega_B$:</strong> Indica fino a quali frequenze il sistema insegue bene. $\omega_B$ alta $\implies$ segue segnali rapidi.</li>
+                         <li><strong>Collegamento Tempo Risposta ($t_r$):</strong> $t_r \approx (1.8 \text{ a } 2.2) / \omega_B$.</li>
+                     </ul>
+                     <p><strong>Conclusione:</strong> Poiché $t_r \propto 1/\omega_B$ e $\omega_B \propto \omega_c$, allora $t_r \propto 1/\omega_c$. Una $\omega_c$ più alta implica una $\omega_B$ più ampia e una risposta temporale più veloce ($t_r$ più breve).</p>
+
+                     <p><strong>Come le Reti Lead/Lag influenzano $\omega_c$:</strong></p>
+                     <ul>
+                         <li><strong>Rete Lead:</strong> Tende ad <strong>aumentare</strong> $\omega_c$. Aumenta il guadagno HF, spingendo l'attraversamento 0 dB a frequenze maggiori. Rende il sistema più veloce.</li>
+                         <li><strong>Rete Lag:</strong> Tende a <strong>diminuire</strong> $\omega_c$. Attenua il guadagno a medie/alte frequenze. Se l'attenuazione avviene prima della $\omega_c$ originale, l'attraversamento 0 dB avviene a frequenza inferiore. Rende il sistema più lento.</li>
+                     </ul>
+                 </div>
+             </details>
+
+             <details>
+                 <summary>Domanda 5: La Rete Correttrice Lead: Come funziona esattamente? Perché la sua FdT produce un anticipo di fase? Dove si posiziona il massimo anticipo? Come si sceglie $\tau$ e $m$?</summary>
+                 <div class="answer">
+                     <p><strong>Funzione di Trasferimento (Forme Comuni):</strong></p>
+                     $$ C_{lead}(s) = K_c \alpha \frac{Ts+1}{\alpha Ts+1} \quad \text{o} \quad C_{lead}(s) = K_{lead} \frac{s+z}{s+p} $$
+                     <p>Dove $z=1/T$ (zero), $p=1/(\alpha T)$ (polo), e per una Lead $\alpha < 1$ (o $m_d = 1/\alpha > 1$). Quindi $|z| < |p|$ (zero più vicino all'origine).</p>
+
+                     <p><strong>Perché produce Anticipo di Fase?</strong></p>
+                     <p>La fase è $\angle C_{lead}(j\omega) = \angle(1 + j\omega T) - \angle(1 + j\omega \alpha T)$.</p>
+                     <ul>
+                         <li>Lo zero $(1 + j\omega T)$ dà anticipo $\arctan(\omega T)$ (da 0° a +90°).</li>
+                         <li>Il polo $(1 + j\omega \alpha T)$ darebbe anticipo $\arctan(\omega \alpha T)$, ma essendo al denominatore contribuisce con $-\arctan(\omega \alpha T)$ (ritardo). Poiché $\alpha < 1$, questo ritardo agisce a frequenze più alte.</li>
+                     </ul>
+                     <p>A frequenze intermedie l'anticipo dello zero "vince" sul ritardo del polo, creando un <span class="highlight">anticipo di fase netto positivo</span>.</p>
+
+                     <p><strong>Frequenza di Massimo Anticipo ($\omega_{max}$):</strong> Media geometrica tra zero e polo.</p>
+                     $$ \omega_{max} = \sqrt{\omega_z \omega_p} = \frac{1}{T\sqrt{\alpha}} $$
+
+                     <p><strong>Valore del Massimo Anticipo ($\phi_{max}$):</strong></p>
+                     $$ \sin(\phi_{max}) = \frac{1-\alpha}{1+\alpha} = \frac{m_d-1}{m_d+1} $$
+                     <p>$m_d$ grande $\implies \phi_{max}$ grande (es: $m_d=10 \implies \phi_{max} \approx 55^\circ$).</p>
+
+                     <p><strong>Come si Sceglie $T$ (o $\tau$) e $\alpha$ (o $m$)?</strong></p>
+                     <ol>
+                         <li>Calcola l'anticipo necessario $\phi_{necessario} = P_{m,des} - P_{m,attuale} + \text{Margine}(5^\circ-10^\circ)$.</li>
+                         <li>Trova $\alpha$ (o $m_d$) dalla formula inversa:
+                            $$ \alpha = \frac{1-\sin(\phi_{necessario})}{1+\sin(\phi_{necessario})} \quad \left( \text{o } m_d = \frac{1+\sin(\phi_{necessario})}{1-\sin(\phi_{necessario})} \right) $$
+                         </li>
+                         <li>Posiziona $\omega_{max}$ alla $\omega_{c,des}$ desiderata: $\omega_{max} = \omega_{c,des}$.</li>
+                         <li>Calcola $T$ (o $\tau$) da $\omega_{max}$:
+                            $$ T = \frac{1}{\omega_{max}\sqrt{\alpha}} = \frac{1}{\omega_{c,des}\sqrt{\alpha}} $$
+                         </li>
+                     </ol>
+                     <p>Questo determina $z=1/T$ e $p=1/(\alpha T)$. Si verifica poi l'effetto sul guadagno a $\omega_{c,des}$ e si itera.</p>
+                 </div>
+             </details>
+
+             <details>
+                 <summary>Domanda 6: La Rete Correttrice Lag: Come funziona esattamente? Perché la sua FdT produce un'attenuazione e un ritardo di fase? Come si usa per migliorare l'errore a regime senza degradare troppo la stabilità?</summary>
+                 <div class="answer">
+                     <p><strong>Funzione di Trasferimento (Forma Comune con Guadagno DC=1):</strong></p>
+                     $$ C_{lag}(s) = \frac{1 + Ts}{1 + \beta Ts} $$
+                     <p>Dove $\beta > 1$ (o $m_i = \beta > 1$). Lo zero è $z=1/T$, il polo è $p=1/(\beta T)$. Per una Lag, $|p| < |z|$ (polo più vicino all'origine).</p>
+
+                     <p><strong>Perché produce Attenuazione e Ritardo di Fase?</strong></p>
+                     <ul>
+                         <li><strong>Magnitudine $|C_{lag}(j\omega)|$:</strong>
+                             <ul>
+                                 <li>Basse Freq ($\omega \ll p$): Guadagno $\approx 1$ (0 dB).</li>
+                                 <li>Alte Freq ($\omega \gg z$): Guadagno $\approx |j\omega T / j\omega \beta T| = 1/\beta$. Attenuazione di $-20\log_{10}(\beta)$ dB.</li>
+                             </ul>
+                         </li>
+                         <li><strong>Fase $\angle C_{lag}(j\omega) = \angle(1+j\omega T) - \angle(1+j\omega \beta T)$:</strong>
+                             <ul>
+                                 <li>Lo zero dà anticipo $\arctan(\omega T)$.</li>
+                                 <li>Il polo (a freq. più bassa) dà un ritardo $-\arctan(\omega \beta T)$ che domina a freq. intermedie.</li>
+                             </ul>
+                             Risultato: <span class="highlight">Ritardo di fase (lag) netto negativo</span> a frequenze intermedie, con massimo ritardo a $\omega_{min} = 1/(T\sqrt{\beta})$. Fase torna a 0° ad alte freq.
+                         </li>
+                     </ul>
+
+                     <p><strong>Come si Usa per Migliorare Errore a Regime / Guadagno Statico?</strong></p>
+                     <p><strong>Problema:</strong> Dopo aver fissato $P_m$ e $\omega_c$ (es. con Lead), $L(0)$ (o $K_v, K_a$) potrebbe essere troppo basso per $e_{ss}$.</p>
+                     <p><strong>Soluzione (Rete Lag):</strong></p>
+                     <ol>
+                         <li>Scegli $\beta$ pari al fattore di cui aumentare il guadagno statico (es., se $K_v$ attuale è 5 e serve 50, scegli $\beta=10$).</li>
+                         <li><strong>Posiziona la Lag a frequenze basse:</strong> Per non rovinare $P_m$, il ritardo di fase deve essere lontano da $\omega_c$. Si pone lo zero $z=1/T$ circa 1 decade sotto $\omega_c$: $1/T \approx \omega_c / 10$. Il polo $p=z/\beta$ sarà ancora più basso.</li>
+                     </ol>
+                     <p><strong>Effetto Netto:</strong></p>
+                     <ul>
+                         <li>A basse frequenze ($\omega \to 0$): La Lag ha guadagno 1. Il guadagno totale $L(0)$ viene aumentato dal fattore $\beta$ scelto per il guadagno di $C_R(s)$ o di un'altra parte del controllore (la Lag non riduce il guadagno a DC). O, se si pensa al guadagno di velocità $K_v = \lim s L(s)$, l'aggiunta della Lag non lo cambia se $K_v$ era già definito. Permette però di usare un $K_c$ in $C_R(s)$ più alto, che altrimenti destabilizzerebbe il sistema. Diciamo che *abilita* un guadagno statico $\beta$ volte maggiore.</li>
+                         <li>Intorno a $\omega_c$: L'attenuazione $-20\log_{10}(\beta)$ è già avvenuta (o non ancora iniziata, a seconda della forma usata). Il ritardo di fase aggiunto a $\omega_c$ è piccolo (< 5-10°). $P_m$ e $\omega_c$ cambiano poco.</li>
+                         <li>Ad alte frequenze: Il guadagno è attenuato di $\beta$, il che può essere utile per la robustezza.</li>
+                     </ul>
+                     <p>In sintesi: La Lag permette di ottenere un guadagno statico (o $K_v/K_a$) più alto (migliorando $e_{ss}$) senza alterare $\omega_c$ e $P_m$, posizionando il suo sfasamento a frequenze $\ll \omega_c$.</p>
+                 </div>
+             </details>
+
+             <!-- Aggiungi altre domande/risposte qui -->
+
+            <hr style="margin-top: 3em;">
+            <p style="margin-top: 2em;">
+                <a href="lezione-loop-shaping.html">← Torna alla Lezione Principale sul Loop Shaping</a> <!-- Assicurati che il nome file sia corretto -->
+            </p>
+        </article>
+    </main>
+</body>
+</html>
